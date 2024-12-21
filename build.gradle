@@ -17,7 +17,7 @@ java {
 }
 
 dependencies {
-    api 'com.github.osrsGoalsTracker:osrs-player-data-interface:v2.0.0'
+    api 'com.github.osrsGoalsTracker:osrs-hiscores-fetcher-interface:v2.0.0'
     
     // Core dependencies
     implementation 'com.google.inject:guice:7.0.0'

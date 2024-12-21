@@ -1,10 +1,10 @@
 # OSRS Player Data API
 
-This is a JDK21 implementation of the [OSRS Player Data Interface](https://github.com/osrsGoalsTracker/osrs-player-data-interface) for fetching player statistics from the Old School RuneScape hiscores. This package implements the interface defined in `osrs-player-data-interface` to provide a concrete implementation for fetching and parsing player data.
+This is a JDK21 implementation of the [OSRS Hiscores Fetcher Interface](https://github.com/osrsGoalsTracker/osrs-hiscores-fetcher-interface) for fetching player statistics from the Old School RuneScape hiscores. This package implements the interface defined in `osrs-hiscores-fetcher-interface` to provide a concrete implementation for fetching and parsing player data.
 
 ## Features
 
-- Full implementation of the [osrs-player-data-interface](https://github.com/osrsGoalsTracker/osrs-player-data-interface) contract
+- Full implementation of the [osrs-hiscores-fetcher-interface](https://github.com/osrsGoalsTracker/osrs-hiscores-fetcher-interface) contract
 - Fetches player skills and activities from the OSRS hiscores using the JSON API
 - Uses Google Guice for dependency injection
 - Built with JDK 21
@@ -17,7 +17,7 @@ This is a JDK21 implementation of the [OSRS Player Data Interface](https://githu
 
 ## Interface Implementation
 
-This package implements the following interfaces from `osrs-player-data-interface`:
+This package implements the following interfaces from `osrs-hiscores-fetcher-interface`:
 
 - `OsrsHiscoresPlayerFetcher`: Main interface for fetching player data
 - `OsrsPlayer`: Model for player data with skills and activities
@@ -51,12 +51,25 @@ dependencies {
 The project includes an example application that demonstrates how to use the API. To run it, provide a player's RSN as a command line argument:
 
 ```bash
+# Regular levels (capped at 99)
 ./gradlew run --args="SoloMission"
+
+# Virtual levels (above 99)
+./gradlew run --args="SoloMission --virtual"
 ```
 
-This will fetch and display the stats for the specified player (in this example, "SoloMission"), showing:
+The RSN can contain spaces, underscores, or dashes:
+```bash
+./gradlew run --args="eow btw --virtual"
+./gradlew run --args="player_name"
+```
+
+This will fetch and display the stats for the specified player, showing:
 - All skills (level, rank, and XP)
+  - With `--virtual` flag, shows levels above 99 based on XP
+  - Without flag, levels are capped at 99
 - All activities (rank and score)
+  - Unranked activities (rank -1) show a score of 0
 
 You can look up any player by replacing "SoloMission" with their RSN:
 ```bash
@@ -93,7 +106,7 @@ public class Example {
         
         // Get an instance of our implementation
         OsrsHiscoresPlayerFetcher fetcher = injector.getInstance(OsrsHiscoresPlayerFetcher.class);
-        
+
         try {
             // Use the fetcher
             OsrsPlayer player = fetcher.getPlayerByRsn("playerName", FetchOptions.builder().build());
@@ -118,10 +131,10 @@ public class Example {
     public static void main(String[] args) {
         // Create the HTTP service
         HttpServiceImpl httpService = new HttpServiceImpl();
-        
+
         // Create the fetcher with the HTTP service
         OsrsHiscoresPlayerFetcher fetcher = new OsrsHiscoresPlayerFetcherImpl(httpService);
-        
+
         try {
             OsrsPlayer player = fetcher.getPlayerByRsn("playerName", FetchOptions.builder().build());
             // ... process player data ...
@@ -226,7 +239,7 @@ Build the project using:
 
 ## Interface Documentation
 
-For detailed information about the interfaces being implemented, please refer to the [osrs-player-data-interface documentation](https://github.com/osrsGoalsTracker/osrs-player-data-interface).
+For detailed information about the interfaces being implemented, please refer to the [osrs-hiscores-fetcher-interface documentation](https://github.com/osrsGoalsTracker/osrs-hiscores-fetcher-interface).
 
 ## License
 

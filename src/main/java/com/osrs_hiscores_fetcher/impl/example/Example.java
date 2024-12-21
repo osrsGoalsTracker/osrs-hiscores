@@ -21,18 +21,20 @@ import com.osrs_hiscores_fetcher.impl.config.OsrsHiscoresModule;
  *   <li>Processing and displaying skills data</li>
  *   <li>Processing and displaying activities/boss data</li>
  *   <li>Proper error handling</li>
+ *   <li>Virtual level calculation</li>
  * </ul>
  * 
  * <p>Run this example using Gradle:
  * <pre>{@code
- * ./gradlew run --args="player name"
+ * ./gradlew run --args="player_name [--virtual]"
  * }</pre>
  * 
  * <p>The RSN (RuneScape Name) can contain spaces, underscores, or dashes.
+ * Add --virtual flag to show virtual levels above 99.
  * Examples:
  * <ul>
  *   <li>{@code ./gradlew run --args="Zezima"}</li>
- *   <li>{@code ./gradlew run --args="eow btw"}</li>
+ *   <li>{@code ./gradlew run --args="eow btw --virtual"}</li>
  *   <li>{@code ./gradlew run --args="player_name"}</li>
  * </ul>
  */
@@ -59,34 +61,52 @@ public class Example {
      *   <li>Displays all activities with their scores and ranks</li>
      * </ol>
      *
-     * @param args Command line arguments. args[0] should be the player's RSN.
-     *             Multiple arguments are joined with spaces to support RSNs containing spaces.
+     * @param args Command line arguments. First argument should be the player's RSN.
+     *             Multiple words are joined with spaces to support RSNs containing spaces.
+     *             Optional --virtual flag to show virtual levels above 99.
      */
     public static void main(String[] args) {
         // Validate command line arguments
         if (args.length < 1) {
             System.err.println("Please provide a player RSN as a command line argument.");
             System.err.println("Example: ./gradlew run --args=\"SoloMission\"");
+            System.err.println("Add --virtual flag to show virtual levels: ./gradlew run --args=\"SoloMission --virtual\"");
             System.exit(1);
         }
 
-        // Join all arguments to handle RSNs with spaces (e.g., "eow btw")
-        String rsn = String.join(" ", args);
+        // Check for virtual flag and build RSN
+        boolean virtualLevels = false;
+        StringBuilder rsnBuilder = new StringBuilder();
+
+        for (String arg : args) {
+            if ("--virtual".equals(arg)) {
+                virtualLevels = true;
+            } else {
+                if (rsnBuilder.length() > 0) {
+                    rsnBuilder.append(" ");
+                }
+                rsnBuilder.append(arg);
+            }
+        }
+
+        String rsn = rsnBuilder.toString();
+
         try {
             // Initialize Guice with our module for dependency injection
             Injector injector = Guice.createInjector(new OsrsHiscoresModule());
-            
+
             // Get the fetcher instance - this is thread-safe and can be reused
             OsrsHiscoresPlayerFetcher fetcher = injector.getInstance(OsrsHiscoresPlayerFetcher.class);
 
-            // Fetch player data using default options
-            // This makes an HTTP request to the OSRS Hiscores API
-            FetchOptions options = FetchOptions.builder().build();
-            OsrsPlayer player = fetcher.getPlayerByRsn(rsn, options);
+            // Fetch player data with specified level calculation option
+            OsrsPlayer player = fetcher.getPlayerByRsn(rsn, FetchOptions.builder()
+                .calculateVirtualLevels(virtualLevels)
+                .build());
 
             // Display player information
             System.out.println("Player: " + player.getRsn());
-            
+            System.out.println("Level Type: " + (virtualLevels ? "Virtual" : "Regular"));
+
             // Display all skills (24 total skills)
             System.out.println("\nSkills:");
             for (Skill skill : player.getSkills()) {
