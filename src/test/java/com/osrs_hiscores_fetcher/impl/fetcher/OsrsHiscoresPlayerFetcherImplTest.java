@@ -1,23 +1,38 @@
 package com.osrs_hiscores_fetcher.impl.fetcher;
 
+import java.io.IOException;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.osrs_hiscores_fetcher.api.FetchOptions;
 import com.osrs_hiscores_fetcher.api.models.OsrsPlayer;
 import com.osrs_hiscores_fetcher.impl.model.HiscoreEntry;
 import com.osrs_hiscores_fetcher.impl.model.HiscoreResponse;
 import com.osrs_hiscores_fetcher.impl.service.HttpService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class OsrsHiscoresPlayerFetcherImplTest {
+    private static final int OVERALL_SKILL_ID = 0;
+    private static final int ATTACK_SKILL_ID = 1;
+    private static final int OVERALL_RANK = 50;
+    private static final int MAX_TOTAL_LEVEL = 2277;
+    private static final long MAX_EXPERIENCE = 200_000_000L;
+    private static final int ATTACK_RANK = 100;
+    private static final int MAX_REGULAR_LEVEL = 99;
+    private static final long LEVEL_100_EXPERIENCE = 14_391_160L;
+    private static final int BOUNTY_HUNTER_RANK = 1000;
+    private static final int BOUNTY_HUNTER_SCORE = 50;
+    private static final int UNRANKED_VALUE = -1;
+    private static final int VIRTUAL_LEVEL_100 = 100;
+    private static final int DEFAULT_SCORE = 0;
+
     @Mock
     private HttpService httpService;
     private OsrsHiscoresPlayerFetcherImpl fetcher;
@@ -30,121 +45,142 @@ class OsrsHiscoresPlayerFetcherImplTest {
     }
 
     @Test
-    void getPlayerByRsn_Success() throws IOException {
-        // Prepare test data
-        HiscoreResponse mockResponse = new HiscoreResponse();
-        HiscoreEntry[] skills = new HiscoreEntry[2];
-        HiscoreEntry[] activities = new HiscoreEntry[2];
-
-        // Overall skill entry
-        HiscoreEntry overallEntry = new HiscoreEntry();
-        overallEntry.setId(0);
-        overallEntry.setName("Overall");
-        overallEntry.setRank(50);
-        overallEntry.setLevel(2277);  // Max total level
-        overallEntry.setExperience(200000000);  // High XP to test virtual level handling
-        skills[0] = overallEntry;
-
-        // Attack skill entry
-        HiscoreEntry attackEntry = new HiscoreEntry();
-        attackEntry.setId(1);
-        attackEntry.setName("Attack");
-        attackEntry.setRank(100);
-        attackEntry.setLevel(99);
-        attackEntry.setExperience(14391160); // Level 100 XP
-        skills[1] = attackEntry;
-
-        // Ranked activity
-        HiscoreEntry rankedActivity = new HiscoreEntry();
-        rankedActivity.setId(0);
-        rankedActivity.setName("Bounty Hunter");
-        rankedActivity.setRank(1000);
-        rankedActivity.setScore(50);
-        activities[0] = rankedActivity;
-
-        // Unranked activity
-        HiscoreEntry unrankedActivity = new HiscoreEntry();
-        unrankedActivity.setId(1);
-        unrankedActivity.setName("LMS");
-        unrankedActivity.setRank(-1);
-        unrankedActivity.setScore(-1);
-        activities[1] = unrankedActivity;
-
-        mockResponse.setSkills(skills);
-        mockResponse.setActivities(activities);
-
-        // Mock HTTP response with JSON
+    void testSuccessfulPlayerFetch() throws IOException {
+        HiscoreResponse mockResponse = createMockResponse();
         when(httpService.get(anyString()))
             .thenReturn(objectMapper.writeValueAsString(mockResponse));
 
-        // Execute test with regular levels
+        verifyRegularLevelFetch();
+        verifyVirtualLevelFetch();
+    }
+
+    private HiscoreResponse createMockResponse() {
+        HiscoreResponse mockResponse = new HiscoreResponse();
+        mockResponse.setSkills(createSkillEntries());
+        mockResponse.setActivities(createActivityEntries());
+        return mockResponse;
+    }
+
+    private HiscoreEntry[] createSkillEntries() {
+        HiscoreEntry[] skills = new HiscoreEntry[2];
+        skills[0] = createOverallSkillEntry();
+        skills[1] = createAttackSkillEntry();
+        return skills;
+    }
+
+    private HiscoreEntry createOverallSkillEntry() {
+        HiscoreEntry overallEntry = new HiscoreEntry();
+        overallEntry.setId(OVERALL_SKILL_ID);
+        overallEntry.setName("Overall");
+        overallEntry.setRank(OVERALL_RANK);
+        overallEntry.setLevel(MAX_TOTAL_LEVEL);
+        overallEntry.setExperience(MAX_EXPERIENCE);
+        return overallEntry;
+    }
+
+    private HiscoreEntry createAttackSkillEntry() {
+        HiscoreEntry attackEntry = new HiscoreEntry();
+        attackEntry.setId(ATTACK_SKILL_ID);
+        attackEntry.setName("Attack");
+        attackEntry.setRank(ATTACK_RANK);
+        attackEntry.setLevel(MAX_REGULAR_LEVEL);
+        attackEntry.setExperience(LEVEL_100_EXPERIENCE);
+        return attackEntry;
+    }
+
+    private HiscoreEntry[] createActivityEntries() {
+        HiscoreEntry[] activities = new HiscoreEntry[2];
+        activities[0] = createRankedActivityEntry();
+        activities[1] = createUnrankedActivityEntry();
+        return activities;
+    }
+
+    private HiscoreEntry createRankedActivityEntry() {
+        HiscoreEntry rankedActivity = new HiscoreEntry();
+        rankedActivity.setId(OVERALL_SKILL_ID);
+        rankedActivity.setName("Bounty Hunter");
+        rankedActivity.setRank(BOUNTY_HUNTER_RANK);
+        rankedActivity.setScore(BOUNTY_HUNTER_SCORE);
+        return rankedActivity;
+    }
+
+    private HiscoreEntry createUnrankedActivityEntry() {
+        HiscoreEntry unrankedActivity = new HiscoreEntry();
+        unrankedActivity.setId(ATTACK_SKILL_ID);
+        unrankedActivity.setName("LMS");
+        unrankedActivity.setRank(UNRANKED_VALUE);
+        unrankedActivity.setScore(UNRANKED_VALUE);
+        return unrankedActivity;
+    }
+
+    private void verifyRegularLevelFetch() throws IOException {
         FetchOptions regularOptions = FetchOptions.builder()
             .calculateVirtualLevels(false)
             .build();
         OsrsPlayer regularPlayer = fetcher.getPlayerByRsn("TestPlayer", regularOptions);
 
-        // Verify regular level results
-        assertNotNull(regularPlayer);
-        assertEquals("TestPlayer", regularPlayer.getRsn());
-        assertEquals(2, regularPlayer.getSkills().size());
-        assertEquals(2, regularPlayer.getActivities().size());
+        verifyBasicPlayerData(regularPlayer);
+        verifyRegularSkillLevels(regularPlayer);
+        verifyActivityData(regularPlayer);
+    }
 
-        // Verify Overall skill (should be regular level)
-        var regularOverall = regularPlayer.getSkills().get(0);
-        assertEquals(0, regularOverall.getId());
-        assertEquals("Overall", regularOverall.getName());
-        assertEquals(50, regularOverall.getRank());
-        assertEquals(2277, regularOverall.getLevel());
-        assertEquals(200000000, regularOverall.getXp());
+    private void verifyBasicPlayerData(OsrsPlayer player) {
+        Assertions.assertNotNull(player);
+        Assertions.assertEquals("TestPlayer", player.getRsn());
+        Assertions.assertEquals(2, player.getSkills().size());
+        Assertions.assertEquals(2, player.getActivities().size());
+    }
 
-        // Verify Attack skill
-        var regularAttack = regularPlayer.getSkills().get(1);
-        assertEquals(1, regularAttack.getId());
-        assertEquals("Attack", regularAttack.getName());
-        assertEquals(100, regularAttack.getRank());
-        assertEquals(99, regularAttack.getLevel());
-        assertEquals(14391160, regularAttack.getXp());
+    private void verifyRegularSkillLevels(OsrsPlayer player) {
+        var regularOverall = player.getSkills().get(0);
+        Assertions.assertEquals(OVERALL_SKILL_ID, regularOverall.getId());
+        Assertions.assertEquals("Overall", regularOverall.getName());
+        Assertions.assertEquals(OVERALL_RANK, regularOverall.getRank());
+        Assertions.assertEquals(MAX_TOTAL_LEVEL, regularOverall.getLevel());
+        Assertions.assertEquals(MAX_EXPERIENCE, regularOverall.getXp());
 
-        // Verify ranked activity
-        var rankedActivityResult = regularPlayer.getActivities().get(0);
-        assertEquals(0, rankedActivityResult.getId());
-        assertEquals("Bounty Hunter", rankedActivityResult.getName());
-        assertEquals(1000, rankedActivityResult.getRank());
-        assertEquals(50, rankedActivityResult.getScore());
+        var regularAttack = player.getSkills().get(1);
+        Assertions.assertEquals(ATTACK_SKILL_ID, regularAttack.getId());
+        Assertions.assertEquals("Attack", regularAttack.getName());
+        Assertions.assertEquals(ATTACK_RANK, regularAttack.getRank());
+        Assertions.assertEquals(MAX_REGULAR_LEVEL, regularAttack.getLevel());
+        Assertions.assertEquals(LEVEL_100_EXPERIENCE, regularAttack.getXp());
+    }
 
-        // Verify unranked activity returns score of 0
-        var unrankedActivityResult = regularPlayer.getActivities().get(1);
-        assertEquals(1, unrankedActivityResult.getId());
-        assertEquals("LMS", unrankedActivityResult.getName());
-        assertEquals(-1, unrankedActivityResult.getRank());
-        assertEquals(0, unrankedActivityResult.getScore(), "Unranked activity should have score of 0");
+    private void verifyActivityData(OsrsPlayer player) {
+        var rankedActivityResult = player.getActivities().get(0);
+        Assertions.assertEquals(OVERALL_SKILL_ID, rankedActivityResult.getId());
+        Assertions.assertEquals("Bounty Hunter", rankedActivityResult.getName());
+        Assertions.assertEquals(BOUNTY_HUNTER_RANK, rankedActivityResult.getRank());
+        Assertions.assertEquals(BOUNTY_HUNTER_SCORE, rankedActivityResult.getScore());
 
-        // Execute test with virtual levels
+        var unrankedActivityResult = player.getActivities().get(1);
+        Assertions.assertEquals(ATTACK_SKILL_ID, unrankedActivityResult.getId());
+        Assertions.assertEquals("LMS", unrankedActivityResult.getName());
+        Assertions.assertEquals(UNRANKED_VALUE, unrankedActivityResult.getRank());
+        Assertions.assertEquals(DEFAULT_SCORE, unrankedActivityResult.getScore());
+    }
+
+    private void verifyVirtualLevelFetch() throws IOException {
         FetchOptions virtualOptions = FetchOptions.builder()
             .calculateVirtualLevels(true)
             .build();
         OsrsPlayer virtualPlayer = fetcher.getPlayerByRsn("TestPlayer", virtualOptions);
 
-        // Verify Overall skill still uses regular level
         var virtualOverall = virtualPlayer.getSkills().get(0);
-        assertEquals(2277, virtualOverall.getLevel(),
-            "Overall level should not be affected by virtual level calculation");
+        Assertions.assertEquals(MAX_TOTAL_LEVEL, virtualOverall.getLevel());
 
-        // Verify Attack skill uses virtual level
         var virtualAttack = virtualPlayer.getSkills().get(1);
-        assertEquals(100, virtualAttack.getLevel(),
-            "Attack should show virtual level 100 for XP of 14,391,160");
+        Assertions.assertEquals(VIRTUAL_LEVEL_100, virtualAttack.getLevel());
     }
 
     @Test
-    void getPlayerByRsn_HttpError() throws IOException {
-        // Mock HTTP error
+    void testHttpError() throws IOException {
         when(httpService.get(anyString()))
             .thenThrow(new IOException("HTTP Error"));
 
-        // Execute test and verify exception
         FetchOptions options = FetchOptions.builder().build();
-        assertThrows(IOException.class, () ->
+        Assertions.assertThrows(IOException.class, () ->
             fetcher.getPlayerByRsn("TestPlayer", options)
         );
     }
