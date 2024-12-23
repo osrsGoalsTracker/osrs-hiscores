@@ -70,7 +70,8 @@ public class Example {
         if (args.length < 1) {
             System.err.println("Please provide a player RSN as a command line argument.");
             System.err.println("Example: ./gradlew run --args=\"SoloMission\"");
-            System.err.println("Add --virtual flag to show virtual levels: ./gradlew run --args=\"SoloMission --virtual\"");
+            System.err.println("Add --virtual flag to show virtual levels:");
+            System.err.println("./gradlew run --args=\"SoloMission --virtual\"");
             System.exit(1);
         }
 

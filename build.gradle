@@ -3,6 +3,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'application'
+    id 'checkstyle'
 }
 
 group = 'com.github.osrsGoalsTracker'
@@ -114,4 +115,31 @@ if (!System.getenv('JITPACK')) {
     application {
         mainClass = 'com.osrs_hiscores_fetcher.impl.example.Example'
     }
-} 
+}
+
+checkstyle {
+    toolVersion = '10.12.5'
+}
+
+tasks.withType(Checkstyle).configureEach {
+    doFirst {
+        def timestamp = System.currentTimeMillis()
+
+        def url = new URL("https://raw.githubusercontent.com/osrsGoalsTracker/java-build-config/refs/heads/main/checkstyle/checkstyle.xml?ts=${timestamp}")
+        def targetFile = file("${rootProject.buildDir}/checkstyle-config.xml")
+        targetFile.parentFile.mkdirs()
+        // Add debug logging
+        println "Downloading Checkstyle config from: ${url}"
+        def content = url.text
+        println "Content:"
+        println content
+
+        targetFile.text = content
+        configFile = targetFile
+    }
+}
+
+// Make Checkstyle part of the build lifecycle
+tasks.named('build').configure {
+    dependsOn tasks.withType(Checkstyle)
+}

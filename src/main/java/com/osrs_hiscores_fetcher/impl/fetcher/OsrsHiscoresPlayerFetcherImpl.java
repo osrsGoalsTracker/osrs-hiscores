@@ -24,8 +24,9 @@ import java.util.List;
  */
 @Singleton
 public class OsrsHiscoresPlayerFetcherImpl implements OsrsHiscoresPlayerFetcher {
-    private static final String HISCORE_API_URL = "https://secure.runescape.com/m=hiscore_oldschool/index_lite.json?player=";
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String HISCORE_API_URL =
+        "https://secure.runescape.com/m=hiscore_oldschool/index_lite.json?player=";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String OVERALL_SKILL_NAME = "Overall";
 
     private final HttpService httpService;
@@ -53,7 +54,7 @@ public class OsrsHiscoresPlayerFetcherImpl implements OsrsHiscoresPlayerFetcher 
         String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
         String response = httpService.get(HISCORE_API_URL + encodedUsername);
 
-        HiscoreResponse hiscoreResponse = objectMapper.readValue(response, HiscoreResponse.class);
+        HiscoreResponse hiscoreResponse = OBJECT_MAPPER.readValue(response, HiscoreResponse.class);
 
         List<Skill> skills = new ArrayList<>();
         List<Activity> activities = new ArrayList<>();
