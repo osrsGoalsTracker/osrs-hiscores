@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.github.osrsGoalsTracker'
-version = '2.0.0'
+version = System.getenv('VERSION') ?: '2.0.0'
 
 java {
     toolchain {
@@ -48,6 +48,10 @@ tasks.withType(JavaCompile).configureEach {
     ]
 }
 
+test {
+    useJUnitPlatform()
+}
+
 tasks.withType(Test).configureEach {
     jvmArgs = [
         '-XX:+IgnoreUnrecognizedVMOptions',
@@ -72,14 +76,6 @@ tasks.withType(JavaExec).configureEach {
         '-XX:+AlwaysPreTouch',
         '-Xshare:off'
     ]
-}
-
-testing {
-    suites {
-        test {
-            useJUnitJupiter()
-        }
-    }
 }
 
 publishing {
@@ -119,9 +115,16 @@ if (!System.getenv('JITPACK')) {
 
 checkstyle {
     toolVersion = '10.13.0'
-    config = resources.text.fromUri("https://raw.githubusercontent.com/osrsGoalsTracker/java-build-config/refs/heads/main/checkstyle/checkstyle.xml")
+    config = resources.text.fromUri("https://raw.githubusercontent.com/osrsGoalsTracker/java-build-config/refs/heads/main/checkstyle/checkstyle.xml?ts=${System.currentTimeMillis()}")
     maxWarnings = 0
     ignoreFailures = false
+}
+
+tasks.withType(Checkstyle).configureEach {
+    doFirst {
+        logger.lifecycle("Checkstyle configuration:")
+        logger.lifecycle(config.asString())
+    }
 }
 
 // Make Checkstyle part of the build lifecycle
