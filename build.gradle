@@ -118,28 +118,20 @@ if (!System.getenv('JITPACK')) {
 }
 
 checkstyle {
-    toolVersion = '10.12.5'
-}
-
-tasks.withType(Checkstyle).configureEach {
-    doFirst {
-        def timestamp = System.currentTimeMillis()
-
-        def url = new URL("https://raw.githubusercontent.com/osrsGoalsTracker/java-build-config/refs/heads/main/checkstyle/checkstyle.xml?ts=${timestamp}")
-        def targetFile = file("${rootProject.buildDir}/checkstyle-config.xml")
-        targetFile.parentFile.mkdirs()
-        // Add debug logging
-        println "Downloading Checkstyle config from: ${url}"
-        def content = url.text
-        println "Content:"
-        println content
-
-        targetFile.text = content
-        configFile = targetFile
-    }
+    toolVersion = '10.13.0'
+    configFile = file("${project.rootDir}/checkstyle.xml")
+    maxWarnings = 0
+    ignoreFailures = false
 }
 
 // Make Checkstyle part of the build lifecycle
 tasks.named('build').configure {
     dependsOn tasks.withType(Checkstyle)
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.guava:guava:33.0.0-jre'
+        exclude group: 'com.google.collections', module: 'google-collections'
+    }
 }

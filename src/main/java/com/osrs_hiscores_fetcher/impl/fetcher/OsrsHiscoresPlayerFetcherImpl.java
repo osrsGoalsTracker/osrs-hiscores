@@ -1,5 +1,14 @@
 package com.osrs_hiscores_fetcher.impl.fetcher;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.osrs_hiscores_fetcher.api.FetchOptions;
 import com.osrs_hiscores_fetcher.api.OsrsHiscoresPlayerFetcher;
@@ -9,14 +18,6 @@ import com.osrs_hiscores_fetcher.api.models.Skill;
 import com.osrs_hiscores_fetcher.impl.model.HiscoreResponse;
 import com.osrs_hiscores_fetcher.impl.service.HttpService;
 import com.osrs_hiscores_fetcher.impl.utils.LevelCalculator;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Implementation of the OsrsHiscoresPlayerFetcher interface.
@@ -28,6 +29,8 @@ public class OsrsHiscoresPlayerFetcherImpl implements OsrsHiscoresPlayerFetcher 
         "https://secure.runescape.com/m=hiscore_oldschool/index_lite.json?player=";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String OVERALL_SKILL_NAME = "Overall";
+    private static final int UNRANKED_VALUE = -1;
+    private static final int DEFAULT_SCORE = 0;
 
     private final HttpService httpService;
 
@@ -61,8 +64,8 @@ public class OsrsHiscoresPlayerFetcherImpl implements OsrsHiscoresPlayerFetcher 
 
         for (var entry : hiscoreResponse.getSkills()) {
             // Overall skill should always use regular levels
-            boolean shouldCalculateVirtual = options.isCalculateVirtualLevels() &&
-                !OVERALL_SKILL_NAME.equals(entry.getName());
+            boolean shouldCalculateVirtual = options.isCalculateVirtualLevels()
+                && !OVERALL_SKILL_NAME.equals(entry.getName());
 
             int level = shouldCalculateVirtual
                 ? LevelCalculator.calculateLevel(entry.getExperience(), true)
@@ -79,7 +82,7 @@ public class OsrsHiscoresPlayerFetcherImpl implements OsrsHiscoresPlayerFetcher 
 
         for (var entry : hiscoreResponse.getActivities()) {
             // If rank is -1 (unranked), set score to 0
-            int score = entry.getRank() == -1 ? 0 : entry.getScore();
+            int score = entry.getRank() == UNRANKED_VALUE ? DEFAULT_SCORE : entry.getScore();
 
             activities.add(new Activity(
                 entry.getId(),

@@ -1,8 +1,5 @@
 package com.osrs_hiscores_fetcher.impl.service.impl;
 
-import com.osrs_hiscores_fetcher.impl.service.HttpService;
-import jakarta.inject.Singleton;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -10,21 +7,26 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+import jakarta.inject.Singleton;
+
+import com.osrs_hiscores_fetcher.impl.service.HttpService;
+
 /**
  * Implementation of the HttpService interface using Java's built-in HttpClient.
  * This implementation includes a configurable timeout and handles request interruption.
  */
 @Singleton
 public class HttpServiceImpl implements HttpService {
+    private static final int CONNECTION_TIMEOUT_SECONDS = 10;
     private final HttpClient httpClient;
 
     /**
      * Creates a new HttpServiceImpl with a configured HttpClient.
-     * The HttpClient is configured with a 10-second connection timeout.
+     * The HttpClient is configured with a connection timeout.
      */
     public HttpServiceImpl() {
         this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
+                .connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT_SECONDS))
                 .build();
     }
 
@@ -48,4 +50,4 @@ public class HttpServiceImpl implements HttpService {
             throw new IOException("Request interrupted", e);
         }
     }
-} 
+}

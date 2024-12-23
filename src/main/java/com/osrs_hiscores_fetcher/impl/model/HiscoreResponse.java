@@ -9,10 +9,10 @@ import lombok.Data;
  */
 @Data
 public class HiscoreResponse {
-    /** Array of skill entries containing the player's skill statistics */
+    /** Array of skill entries containing the player's skill statistics. */
     private HiscoreEntry[] skills;
     
-    /** Array of activity entries containing the player's activity statistics */
+    /** Array of activity entries containing the player's activity statistics. */
     private HiscoreEntry[] activities;
 
     /**
@@ -22,4 +22,4 @@ public class HiscoreResponse {
     public HiscoreResponse() {
         // Default constructor for Jackson
     }
-} 
+}

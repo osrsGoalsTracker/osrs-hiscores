@@ -8,15 +8,20 @@ public final class LevelCalculator {
     private static final int MAX_REGULAR_LEVEL = 99;
     private static final int MAX_VIRTUAL_LEVEL = 126;
     private static final int[] XP_TABLE = new int[MAX_VIRTUAL_LEVEL + 1];
+    private static final int XP_MULTIPLIER = 300;
+    private static final double XP_POWER_BASE = 2.0;
+    private static final double XP_POWER_DIVISOR = 7.0;
+    private static final int XP_POINTS_DIVISOR = 4;
+    private static final int MIN_LEVEL = 1;
 
     static {
         // Initialize XP table using OSRS formula
-        for (int level = 1; level <= MAX_VIRTUAL_LEVEL; level++) {
+        for (int level = MIN_LEVEL; level <= MAX_VIRTUAL_LEVEL; level++) {
             double points = 0;
-            for (int i = 1; i < level; i++) {
-                points += Math.floor(i + 300 * Math.pow(2, i / 7.0));
+            for (int i = MIN_LEVEL; i < level; i++) {
+                points += Math.floor(i + XP_MULTIPLIER * Math.pow(XP_POWER_BASE, i / XP_POWER_DIVISOR));
             }
-            XP_TABLE[level] = (int) Math.floor(points / 4);
+            XP_TABLE[level] = (int) Math.floor(points / XP_POINTS_DIVISOR);
         }
     }
 
@@ -41,12 +46,12 @@ public final class LevelCalculator {
         int maxLevel = calculateVirtualLevels ? MAX_VIRTUAL_LEVEL : MAX_REGULAR_LEVEL;
         
         // Find the highest level where the XP requirement is met
-        for (int level = maxLevel; level >= 1; level--) {
+        for (int level = maxLevel; level >= MIN_LEVEL; level--) {
             if (xp >= XP_TABLE[level]) {
                 return level;
             }
         }
         
-        return 1; // Default to level 1 if XP is too low
+        return MIN_LEVEL;
     }
-} 
+}

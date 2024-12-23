@@ -32,7 +32,6 @@ public class OsrsHiscoresModule extends AbstractModule {
      * The module is stateless and can be safely reused across multiple injectors.
      */
     public OsrsHiscoresModule() {
-        super();
     }
 
     /**
@@ -53,4 +52,4 @@ public class OsrsHiscoresModule extends AbstractModule {
         bind(HttpService.class).to(HttpServiceImpl.class);
         bind(OsrsHiscoresPlayerFetcher.class).to(OsrsHiscoresPlayerFetcherImpl.class);
     }
-} 
+}

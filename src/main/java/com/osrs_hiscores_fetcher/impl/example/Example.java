@@ -1,5 +1,6 @@
 package com.osrs_hiscores_fetcher.impl.example;
 
+// Third-party imports
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.osrs_hiscores_fetcher.api.FetchOptions;
@@ -38,7 +39,7 @@ import com.osrs_hiscores_fetcher.impl.config.OsrsHiscoresModule;
  *   <li>{@code ./gradlew run --args="player_name"}</li>
  * </ul>
  */
-public class Example {
+public final class Example {
     /**
      * Creates a new Example instance.
      * Private constructor to prevent instantiation as this is a utility class with only static methods.
@@ -52,30 +53,44 @@ public class Example {
      * Main method that demonstrates fetching and displaying player statistics.
      * This method shows a complete workflow of fetching and displaying OSRS player data.
      * 
-     * <p>The method performs the following steps:
-     * <ol>
-     *   <li>Validates command line arguments</li>
-     *   <li>Sets up Guice dependency injection</li>
-     *   <li>Fetches player data from the OSRS Hiscores</li>
-     *   <li>Displays all skills with their levels, ranks, and XP</li>
-     *   <li>Displays all activities with their scores and ranks</li>
-     * </ol>
-     *
      * @param args Command line arguments. First argument should be the player's RSN.
      *             Multiple words are joined with spaces to support RSNs containing spaces.
      *             Optional --virtual flag to show virtual levels above 99.
      */
     public static void main(String[] args) {
-        // Validate command line arguments
-        if (args.length < 1) {
-            System.err.println("Please provide a player RSN as a command line argument.");
-            System.err.println("Example: ./gradlew run --args=\"SoloMission\"");
-            System.err.println("Add --virtual flag to show virtual levels:");
-            System.err.println("./gradlew run --args=\"SoloMission --virtual\"");
-            System.exit(1);
+        if (!validateArgs(args)) {
+            return;
         }
 
-        // Check for virtual flag and build RSN
+        PlayerNameOptions options = parsePlayerNameOptions(args);
+        fetchAndDisplayPlayerData(options.rsn(), options.virtualLevels());
+    }
+
+    /**
+     * Validates the command line arguments.
+     *
+     * @param args Command line arguments to validate
+     * @return true if arguments are valid, false otherwise
+     */
+    private static boolean validateArgs(String[] args) {
+        if (args.length >= 1) {
+            return true;
+        }
+
+        System.err.println("Please provide a player RSN as a command line argument.");
+        System.err.println("Example: ./gradlew run --args=\"SoloMission\"");
+        System.err.println("Add --virtual flag to show virtual levels:");
+        System.err.println("./gradlew run --args=\"SoloMission --virtual\"");
+        return false;
+    }
+
+    /**
+     * Parses command line arguments into player name options.
+     *
+     * @param args Command line arguments to parse
+     * @return PlayerNameOptions containing the RSN and virtual levels flag
+     */
+    private static PlayerNameOptions parsePlayerNameOptions(String[] args) {
         boolean virtualLevels = false;
         StringBuilder rsnBuilder = new StringBuilder();
 
@@ -90,49 +105,83 @@ public class Example {
             }
         }
 
-        String rsn = rsnBuilder.toString();
+        return new PlayerNameOptions(rsnBuilder.toString(), virtualLevels);
+    }
 
+    /**
+     * Fetches and displays player data using the OSRS Hiscores API.
+     *
+     * @param rsn Player's RuneScape name
+     * @param virtualLevels Whether to show virtual levels above 99
+     */
+    private static void fetchAndDisplayPlayerData(String rsn, boolean virtualLevels) {
         try {
-            // Initialize Guice with our module for dependency injection
             Injector injector = Guice.createInjector(new OsrsHiscoresModule());
-
-            // Get the fetcher instance - this is thread-safe and can be reused
             OsrsHiscoresPlayerFetcher fetcher = injector.getInstance(OsrsHiscoresPlayerFetcher.class);
 
-            // Fetch player data with specified level calculation option
             OsrsPlayer player = fetcher.getPlayerByRsn(rsn, FetchOptions.builder()
                 .calculateVirtualLevels(virtualLevels)
                 .build());
 
-            // Display player information
-            System.out.println("Player: " + player.getRsn());
-            System.out.println("Level Type: " + (virtualLevels ? "Virtual" : "Regular"));
-
-            // Display all skills (24 total skills)
-            System.out.println("\nSkills:");
-            for (Skill skill : player.getSkills()) {
-                System.out.printf("%s: Level %d (Rank %d, XP %d)%n",
-                    skill.getName(),
-                    skill.getLevel(),
-                    skill.getRank(),
-                    skill.getXp()
-                );
-            }
-            
-            // Display all activities (including boss kills, minigames, etc.)
-            System.out.println("\nActivities:");
-            for (Activity activity : player.getActivities()) {
-                // A rank of -1 indicates the player is unranked in this activity
-                System.out.printf("%s: Score %d (Rank %d)%n",
-                    activity.getName(),
-                    activity.getScore(),
-                    activity.getRank()
-                );
-            }
+            displayPlayerInformation(player, virtualLevels);
         } catch (Exception e) {
-            // Handle any errors (network issues, player not found, etc.)
             System.err.println("Error fetching player data: " + e.getMessage());
             e.printStackTrace();
         }
     }
-} 
+
+    /**
+     * Displays player information including skills and activities.
+     *
+     * @param player Player data to display
+     * @param virtualLevels Whether virtual levels are being displayed
+     */
+    private static void displayPlayerInformation(OsrsPlayer player, boolean virtualLevels) {
+        System.out.println("Player: " + player.getRsn());
+        System.out.println("Level Type: " + (virtualLevels ? "Virtual" : "Regular"));
+
+        displaySkills(player);
+        displayActivities(player);
+    }
+
+    /**
+     * Displays all skills for a player.
+     *
+     * @param player Player whose skills to display
+     */
+    private static void displaySkills(OsrsPlayer player) {
+        System.out.println("\nSkills:");
+        for (Skill skill : player.getSkills()) {
+            System.out.printf("%s: Level %d (Rank %d, XP %d)%n",
+                skill.getName(),
+                skill.getLevel(),
+                skill.getRank(),
+                skill.getXp()
+            );
+        }
+    }
+
+    /**
+     * Displays all activities for a player.
+     *
+     * @param player Player whose activities to display
+     */
+    private static void displayActivities(OsrsPlayer player) {
+        System.out.println("\nActivities:");
+        for (Activity activity : player.getActivities()) {
+            System.out.printf("%s: Score %d (Rank %d)%n",
+                activity.getName(),
+                activity.getScore(),
+                activity.getRank()
+            );
+        }
+    }
+
+    /**
+     * Record to hold player name options parsed from command line arguments.
+     *
+     * @param rsn Player's RuneScape name
+     * @param virtualLevels Whether to show virtual levels
+     */
+    private record PlayerNameOptions(String rsn, boolean virtualLevels) { }
+}
