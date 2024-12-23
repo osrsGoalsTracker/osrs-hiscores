@@ -25,8 +25,7 @@ import com.osrs_hiscores_fetcher.impl.utils.LevelCalculator;
  */
 @Singleton
 public class OsrsHiscoresPlayerFetcherImpl implements OsrsHiscoresPlayerFetcher {
-    private static final String HISCORE_API_URL =
-        "https://secure.runescape.com/m=hiscore_oldschool/index_lite.json?player=";
+    private static final String HISCORE_API_URL = "https://secure.runescape.com/m=hiscore_oldschool/index_lite.json?player=";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String OVERALL_SKILL_NAME = "Overall";
     private static final int UNRANKED_VALUE = -1;

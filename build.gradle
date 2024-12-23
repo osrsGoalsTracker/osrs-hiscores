@@ -119,7 +119,7 @@ if (!System.getenv('JITPACK')) {
 
 checkstyle {
     toolVersion = '10.13.0'
-    configFile = file("${project.rootDir}/checkstyle.xml")
+    config = resources.text.fromUri("https://raw.githubusercontent.com/osrsGoalsTracker/java-build-config/refs/heads/main/checkstyle/checkstyle.xml")
     maxWarnings = 0
     ignoreFailures = false
 }
