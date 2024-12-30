@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'checkstyle'
 }
 
 group = 'com.osrshiscores'
@@ -39,6 +40,17 @@ java {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+}
+
+checkstyle {
+    toolVersion = '10.12.5'
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    maxWarnings = 0
+    ignoreFailures = false
+}
+
+tasks.named('check').configure {
+    dependsOn 'checkstyleMain', 'checkstyleTest'
 }
 
 // Ensure the example class is included in the jar

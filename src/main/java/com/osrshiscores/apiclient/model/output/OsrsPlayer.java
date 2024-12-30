@@ -46,4 +46,4 @@ public class OsrsPlayer {
         this.skills = Collections.unmodifiableList(new ArrayList<>(skills));
         this.activities = Collections.unmodifiableList(new ArrayList<>(activities));
     }
-} 
+}

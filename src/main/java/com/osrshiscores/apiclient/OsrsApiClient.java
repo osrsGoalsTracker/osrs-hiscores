@@ -16,6 +16,7 @@ import com.osrshiscores.apiclient.utils.HiscoresResponseParser;
  */
 public class OsrsApiClient {
     private static final String HISCORES_URL = "https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=";
+    private static final String HISCORES_UR2L = "https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=";
     private final HttpService httpService;
 
     /**
@@ -58,4 +59,4 @@ public class OsrsApiClient {
         String response = httpService.get(HISCORES_URL + encodedRsn);
         return HiscoresResponseParser.parse(rsn, response, options);
     }
-} 
+}

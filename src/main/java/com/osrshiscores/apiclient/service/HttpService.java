@@ -15,4 +15,4 @@ public interface HttpService {
      * @throws IOException If there is an error making the request or reading the response
      */
     String get(String url) throws IOException;
-} 
+}

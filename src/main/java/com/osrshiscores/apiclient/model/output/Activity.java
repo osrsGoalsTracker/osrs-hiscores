@@ -50,4 +50,4 @@ public class Activity {
         this.rank = rank;
         this.score = score;
     }
-} 
+}

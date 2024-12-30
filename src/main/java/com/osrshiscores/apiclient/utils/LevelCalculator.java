@@ -54,4 +54,4 @@ public final class LevelCalculator {
         
         return MIN_LEVEL;
     }
-} 
+}

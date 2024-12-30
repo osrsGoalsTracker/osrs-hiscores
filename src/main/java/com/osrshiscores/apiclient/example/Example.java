@@ -114,4 +114,4 @@ public final class Example {
     }
 
     private record PlayerNameOptions(String rsn, boolean virtualLevels) { }
-} 
+}

@@ -16,7 +16,6 @@ public final class HiscoresResponseParser {
     private static final int SKILL_COUNT = 24;
     private static final int ACTIVITY_COUNT = 40;
     private static final int OVERALL_SKILL_ID = 0;
-    private static final String OVERALL_SKILL_NAME = "Overall";
     private static final int UNRANKED_VALUE = -1;
     private static final int DEFAULT_SCORE = 0;
 
@@ -69,11 +68,7 @@ public final class HiscoresResponseParser {
             int level = Integer.parseInt(parts[1]);
             long xp = Long.parseLong(parts[2]);
 
-            // Overall skill should always use regular levels
-            boolean shouldCalculateVirtual = options.isCalculateVirtualLevels()
-                && i != OVERALL_SKILL_ID;
-
-            if (shouldCalculateVirtual) {
+            if (options.isCalculateVirtualLevels() && i != OVERALL_SKILL_ID) {
                 level = LevelCalculator.calculateLevel(xp, true);
             }
 
@@ -87,15 +82,9 @@ public final class HiscoresResponseParser {
         for (int i = 0; i < ACTIVITY_COUNT; i++) {
             String[] parts = lines[i + SKILL_COUNT].split(",");
             int rank = Integer.parseInt(parts[0]);
-            int score = Integer.parseInt(parts[1]);
-
-            // If rank is -1 (unranked), set score to 0
-            if (rank == UNRANKED_VALUE) {
-                score = DEFAULT_SCORE;
-            }
-
+            int score = rank == UNRANKED_VALUE ? DEFAULT_SCORE : Integer.parseInt(parts[1]);
             activities.add(new Activity(i, ACTIVITY_NAMES[i], rank, score));
         }
         return activities;
     }
-} 
+}

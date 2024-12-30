@@ -58,4 +58,4 @@ public class Skill {
         this.level = level;
         this.xp = xp;
     }
-} 
+}

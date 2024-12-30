@@ -47,4 +47,4 @@ public class HttpServiceImpl implements HttpService {
             throw new IOException("Request interrupted", e);
         }
     }
-} 
+}
