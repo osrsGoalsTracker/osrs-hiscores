@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'checkstyle'
+    id 'pmd'
 }
 
 group = 'com.osrshiscores'
@@ -49,8 +50,15 @@ checkstyle {
     ignoreFailures = false
 }
 
+pmd {
+    toolVersion = '6.55.0'
+    ruleSetFiles = files("${rootDir}/config/pmd/ruleset.xml")
+    ruleSets = []
+    ignoreFailures = false
+}
+
 tasks.named('check').configure {
-    dependsOn 'checkstyleMain', 'checkstyleTest'
+    dependsOn 'checkstyleMain', 'checkstyleTest', 'pmdMain', 'pmdTest'
 }
 
 // Ensure the example class is included in the jar
