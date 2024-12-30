@@ -1,4 +1,4 @@
-package com.osrs_hiscores_fetcher.impl.service;
+package com.osrshiscores.apiclient.service;
 
 import java.io.IOException;
 
@@ -15,4 +15,4 @@ public interface HttpService {
      * @throws IOException If there is an error making the request or reading the response
      */
     String get(String url) throws IOException;
-}
+} 

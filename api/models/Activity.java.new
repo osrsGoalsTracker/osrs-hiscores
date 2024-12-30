@@ -1,0 +1,53 @@
+package com.osrs_hiscores_fetcher.api.models;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Value;
+
+/**
+ * Represents a player's activity in OSRS.
+ * This class contains information about a player's score and rank in a particular activity.
+ */
+@Value
+public class Activity {
+    /**
+     * The ID of the activity.
+     */
+    private final int id;
+
+    /**
+     * The name of the activity.
+     */
+    private final String name;
+
+    /**
+     * The player's rank in this activity.
+     */
+    private final int rank;
+
+    /**
+     * The player's score in this activity.
+     */
+    private final int score;
+
+    /**
+     * Creates a new Activity instance.
+     *
+     * @param id The ID of the activity
+     * @param name The name of the activity
+     * @param rank The player's rank in this activity
+     * @param score The player's score in this activity
+     */
+    @JsonCreator
+    public Activity(
+            @JsonProperty("id") int id,
+            @JsonProperty("name") String name,
+            @JsonProperty("rank") int rank,
+            @JsonProperty("score") int score) {
+        this.id = id;
+        this.name = name;
+        this.rank = rank;
+        this.score = score;
+    }
+} 

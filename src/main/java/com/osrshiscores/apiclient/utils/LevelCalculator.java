@@ -1,4 +1,4 @@
-package com.osrs_hiscores_fetcher.impl.utils;
+package com.osrshiscores.apiclient.utils;
 
 /**
  * Utility class for calculating OSRS skill levels based on experience points.
@@ -54,4 +54,4 @@ public final class LevelCalculator {
         
         return MIN_LEVEL;
     }
-}
+} 
