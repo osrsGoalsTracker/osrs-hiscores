@@ -30,10 +30,24 @@ src/main/java/com/osrshiscores/apiclient/
 
 ## Quick Start
 
-1. Add the dependency to your `build.gradle`:
+1. Add the Jitpack repository and dependency to your project:
+
+### Gradle
+Add to your root `settings.gradle`:
+```groovy
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+Add to your module's `build.gradle`:
 ```groovy
 dependencies {
-    implementation 'com.osrshiscores:osrs-api-client:1.0-SNAPSHOT'
+    implementation 'com.github.osrsGoalsTracker:osrs-hiscores:v2.0.0' // Or the latest version
 }
 ```
 
@@ -89,7 +103,6 @@ try {
     System.err.println("Error: " + e.getMessage());
 }
 ```
-
 ### Error Handling
 
 The library uses standard Java exceptions:
