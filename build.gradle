@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'checkstyle'
     id 'pmd'
+    id 'maven-publish'
 }
 
 group = 'com.osrshiscores'
@@ -70,4 +71,42 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Configure publishing
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'osrs-hiscores'
+            
+            pom {
+                name = 'osrs-hiscores'
+                description = 'A Java client for the Old School RuneScape Hiscores API'
+                groupId = 'com.osrshiscores'
+            }
+        }
+    }
+
+    repositories {
+        if (System.getenv('CODEARTIFACT_REPOSITORY_URL') != null) {
+            maven {
+                name = 'CodeArtifact'
+                url = System.getenv('CODEARTIFACT_REPOSITORY_URL')
+                credentials {
+                    username = "aws"
+                    password = System.getenv('CODEARTIFACT_AUTH_TOKEN')
+                }
+            }
+        }
+    }
+}
+
+// Task to publish all artifacts
+task publishArtifacts {
+    description = 'Publishes all artifacts to AWS CodeArtifact'
+    group = 'publishing'
+    dependsOn tasks.withType(PublishToMavenRepository).matching { 
+        it.repository == publishing.repositories.findByName('CodeArtifact') 
+    }
 }
